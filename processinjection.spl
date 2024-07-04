@@ -1,0 +1,9 @@
+index=main sourcetype="WinEventLog:Sysmon" EventCode=8 
+| stats count as ThreadsCreated by SourceImage 
+| eventstats avg(ThreadsCreated) as avg stdev(ThreadsCreated) as stdev
+| eval isOutlier=if(ThreadsCreated > (avg + (2*stdev)),1,0) 
+| search isOutlier=1
+
+
+#this query filters the processes that deviates 2 times the standard deviation of the avg threads created by processes which can indicate potential process injection.
+#Though context and further investigation is required. 
