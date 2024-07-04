@@ -1,0 +1,6 @@
+index=main sourcetype="WinEventLog:Sysmon" EventCode=3 
+| bin _time span=1h
+| stats count as NetworkConnections by _time , Image
+| streamstats time_window=24h avg(NetworkConnections) as avg stdev(NetworkConnections) as stdev by Image 
+| eval anomaly=(avg + (0.5*stdev)), isOutlier=if(NetworkConnections > anomaly, 1, 0)
+| search isOutlier=1
